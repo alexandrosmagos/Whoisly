@@ -1,0 +1,15 @@
+[versions]
+junit = "4.13.2"
+junit-v4-v13-v2-v13 = "3.2.2.0"
+scalatest-v2-v13 = "3.2.17"
+http4s-blaze-client = "1.0.0-M39"
+scala-java-time = "2.3.0"
+dnsjava = "3.5.3"
+
+[libraries]
+junit = { module = "junit:junit", version.ref = "junit" }
+junit-v4-v13-v2-v13 = { module = "org.scalatestplus:junit-4-13_2.13", version.ref = "junit-v4-v13-v2-v13" }
+scalatest-v2-v13 = { module = "org.scalatest:scalatest_2.13", version.ref = "scalatest-v2-v13" }
+http4s-blaze-client = { module = "org.http4s:http4s-blaze-client_2.13", version.ref = "http4s-blaze-client" }
+scala-java-time = { module = "io.github.cquiroz:scala-java-time_2.13", version.ref = "scala-java-time" }
+dnsjava = { module = "dnsjava:dnsjava", version.ref = "dnsjava" }

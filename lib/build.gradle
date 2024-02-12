@@ -1,0 +1,25 @@
+plugins {
+    id 'scala'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation libs.http4s.blaze.client
+    implementation libs.dnsjava
+    implementation libs.scala.java.time
+
+    // Use Scalatest for testing our library
+    testImplementation libs.junit
+    testImplementation libs.scalatest.v2.v13
+    testImplementation libs.junit.v4.v13.v2.v13
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
