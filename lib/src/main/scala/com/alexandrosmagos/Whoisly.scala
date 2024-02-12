@@ -14,6 +14,7 @@ class Whoisly {
     domain: String
   ): Future[WhoisResponse] = Future {
     val asciiDomain = IDN.toASCII(domain)
+
     if (!DomainParser.isValidDomain(asciiDomain)) {
       WhoisResponse(asciiDomain, whoisData(), "", Some(s"Invalid domain: $asciiDomain"))
     } else {
