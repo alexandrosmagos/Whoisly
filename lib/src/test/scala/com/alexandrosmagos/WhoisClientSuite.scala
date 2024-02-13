@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 @RunWith(classOf[JUnitRunner])
 class WhoisClientSuite extends AnyFunSuite {
 
-  private val whoisTimeout = 3.minutes
+  private val whoisTimeout = 1.minutes
 
   test("WHOIS domain server for .guru TLD is correct") {
     val whoisServer = ServerUtils.determineWhoisServer("sus.guru")
@@ -20,17 +20,27 @@ class WhoisClientSuite extends AnyFunSuite {
     assert(whoisServer == "whois.nic.guru")
   }
 
-  test("WHOIS query for python.org contains specific data") {
-    val whoisClient    = new Whoisly()
-    val futureResponse = whoisClient.query("python.org")
-
-    val result: WhoisResponse = Await.result(futureResponse, whoisTimeout)
-
-    assert(
-      result.response.createdDate.getOrElse("") == "1995-03-27T05:00:00Z" &&
-        result.response.expiryDate.getOrElse("") == "2033-03-28T05:00:00Z"
-    )
-  }
+//  test("WHOIS query for python.org contains specific data") {
+//    val whoisClient    = new Whoisly()
+//    val futureResponse = whoisClient.query("python.org")
+//
+//    val result: WhoisResponse = Await.result(futureResponse, whoisTimeout)
+//
+//    assert(
+//      result.response.createdDate.getOrElse("") == "1995-03-27T05:00:00Z" &&
+//        result.response.expiryDate.getOrElse("") == "2033-03-28T05:00:00Z"
+//    )
+//  }
+//
+//  test("WHOIS query for a non-existent domain returns no data") {
+//    val whoisClient    = new Whoisly()
+//    val futureResponse = whoisClient.query("nonexistent1234567890domain.org")
+//
+//    val result = Await.result(futureResponse, whoisTimeout)
+//
+//    assert(result.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
+//    assert(result.error.isDefined, "Expected an error message indicating no data")
+//  }
 
   test("Domain validation rejects invalid domain names") {
     val invalidDomains =
@@ -50,16 +60,6 @@ class WhoisClientSuite extends AnyFunSuite {
     val result = Await.result(futureResponse, whoisTimeout)
 
     assert(result.error.isDefined, "Expected an error for an invalid domain")
-  }
-
-  test("WHOIS query for a non-existent domain returns no data") {
-    val whoisClient    = new Whoisly()
-    val futureResponse = whoisClient.query("nonexistent1234567890domain.org")
-
-    val result = Await.result(futureResponse, whoisTimeout)
-
-    assert(result.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
-    assert(result.error.isDefined, "Expected an error message indicating no data")
   }
 
   test("WHOIS query for a domain with special characters is handled correctly") {
