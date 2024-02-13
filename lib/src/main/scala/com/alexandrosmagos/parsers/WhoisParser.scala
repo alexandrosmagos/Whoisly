@@ -4,7 +4,7 @@ import com.alexandrosmagos.whoisData
 
 object WhoisParser {
 
-  // Define the terms that indicate no useful data
+  // Terms indicating no useful data
   private val noData: Set[String] = Set(
     "-",
     ".",
@@ -41,7 +41,7 @@ object WhoisParser {
     "not available from registry"
   )
 
-  // Define phrases indicating a lack of data or non-existence of the domain
+  // Phrases indicating a lack of data or non-existence of the domain
   private val errorPhrases: Set[String] = Set(
     "Domain not found.",
     "No match for",
