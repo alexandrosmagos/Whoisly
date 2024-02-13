@@ -16,6 +16,7 @@ dependencies {
     testImplementation libs.junit
     testImplementation libs.scalatest.v2.v13
     testImplementation libs.junit.v4.v13.v2.v13
+    testImplementation libs.slf4j.simple
 }
 
 java {

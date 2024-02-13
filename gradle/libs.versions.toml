@@ -5,6 +5,7 @@ scalatest-v2-v13 = "3.2.17"
 http4s-blaze-client = "1.0.0-M39"
 scala-java-time = "2.3.0"
 dnsjava = "3.5.3"
+slf4j-simple = "2.0.12"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -13,3 +14,4 @@ scalatest-v2-v13 = { module = "org.scalatest:scalatest_2.13", version.ref = "sca
 http4s-blaze-client = { module = "org.http4s:http4s-blaze-client_2.13", version.ref = "http4s-blaze-client" }
 scala-java-time = { module = "io.github.cquiroz:scala-java-time_2.13", version.ref = "scala-java-time" }
 dnsjava = { module = "dnsjava:dnsjava", version.ref = "dnsjava" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-simple" }
