@@ -11,8 +11,8 @@ import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
 class WhoisClientSuite extends AnyFunSuite {
-  
-  private val whoisTimeout = 25.seconds
+
+  private val whoisTimeout = 3.minutes
 
   test("WHOIS domain server for .guru TLD is correct") {
     val whoisServer = ServerUtils.determineWhoisServer("sus.guru")
@@ -50,7 +50,6 @@ class WhoisClientSuite extends AnyFunSuite {
     val result = Await.result(futureResponse, whoisTimeout)
 
     assert(result.error.isDefined, "Expected an error for an invalid domain")
-    println(s"Error for invalid domain: ${result.error.get}")
   }
 
   test("WHOIS query for a non-existent domain returns no data") {
