@@ -12,23 +12,23 @@ object DomainParser {
     }
   }
 
+  private val labelRegex = "^[a-zA-Z0-9-]{1,63}$".r
+
   def isValidDomain(
     domain: String
-  ): Boolean = {
-    if (domain.isEmpty || domain.length > 253) return false
-
-    val labels = domain.split("\\.")
-    labels.forall(label => label.matches("^[a-zA-Z0-9-]{1,63}$") && !label.startsWith("-") && !label.endsWith("-"))
-  }
+  ): Boolean =
+    if (domain.isEmpty || domain.length > 253) false
+    else
+      domain
+        .split("\\.")
+        .forall(label => labelRegex.pattern.matcher(label).matches && !label.startsWith("-") && !label.endsWith("-"))
 
   def getTLD(
     domain: String
-  ): Option[String] =
-    parse(domain)._2
+  ): Option[String] = parse(domain)._2
 
   def getSLD(
     domain: String
-  ): Option[String] =
-    parse(domain)._1
+  ): Option[String] = parse(domain)._1
 
 }

@@ -1,12 +1,12 @@
 package com.alexandrosmagos
 
-case class WhoisResponse(
+case class DomainQueryResult(
   domain: String,
-  response: whoisData,
+  response: DomainDetails,
   rawResponse: String,
   error: Option[String] = None)
 
-case class whoisData(
+case class DomainDetails(
   domainName: Option[String] = None,
   IDN: Option[String] = None,
   nameServers: List[String] = List.empty,

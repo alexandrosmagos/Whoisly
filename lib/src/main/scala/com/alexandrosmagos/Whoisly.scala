@@ -6,24 +6,30 @@ import com.alexandrosmagos.utils.ServerUtils
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{IDN, Socket}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, blocking}
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.{Await, Future, blocking}
 
 class Whoisly {
 
   def query(
     domain: String
-  ): Future[WhoisResponse] = Future {
+  ): Future[DomainQueryResult] = Future {
     val asciiDomain = IDN.toASCII(domain)
     if (!DomainParser.isValidDomain(asciiDomain)) {
-      WhoisResponse(asciiDomain, whoisData(), "", Some(s"Invalid domain: $asciiDomain"))
+      DomainQueryResult(asciiDomain, DomainDetails(), "", Some(s"Invalid domain: $asciiDomain"))
     } else {
       val server              = ServerUtils.determineWhoisServer(asciiDomain)
       val rawWhoisData        = performWhoisQuery(server, asciiDomain)
       val (parsedData, error) = WhoisParser.parse(rawWhoisData)
 
-      WhoisResponse(asciiDomain, parsedData, rawWhoisData, error)
+      DomainQueryResult(asciiDomain, parsedData, rawWhoisData, error)
     }
   }
+
+  def querySync(
+    domain: String,
+    duration: Duration = 10.seconds
+  ): DomainQueryResult = Await.result(query(domain), duration)
 
   private def performWhoisQuery(
     server: String,
@@ -31,6 +37,7 @@ class Whoisly {
   ): String = blocking {
     try {
       val socket = new Socket(server, 43)
+      socket.setSoTimeout(5000)
       try {
         val out = new PrintWriter(socket.getOutputStream, true)
         val in  = new BufferedReader(new InputStreamReader(socket.getInputStream))

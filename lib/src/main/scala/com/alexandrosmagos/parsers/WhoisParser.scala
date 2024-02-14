@@ -1,6 +1,6 @@
 package com.alexandrosmagos.parsers
 
-import com.alexandrosmagos.whoisData
+import com.alexandrosmagos.DomainDetails
 
 object WhoisParser {
 
@@ -153,51 +153,47 @@ object WhoisParser {
 
   def parse(
     rawWhoisData: String
-  ): (whoisData, Option[String]) = {
-    val lines = rawWhoisData.split("\n")
+  ): (DomainDetails, Option[String]) = {
+    if (errorPhrases.exists(rawWhoisData.contains)) {
+      return (DomainDetails(), Some("No data available for the domain"))
+    }
 
-    val containsError = errorPhrases.exists(phrase => rawWhoisData.contains(phrase))
+    val parsedData = rawWhoisData.split("\n").foldLeft(Map.empty[String, List[String]]) {
+      case (acc, line) =>
+        line.split(":", 2) match {
+          case Array(label, value) if value.trim.nonEmpty =>
+            val normalizedValue = value.trim
+            if (!noData.contains(normalizedValue.toLowerCase)) {
+              val finalLabel = renameLabels.getOrElse(label.trim.toLowerCase, label.trim.capitalize)
+              acc.updated(finalLabel, acc.getOrElse(finalLabel, List.empty) :+ normalizedValue)
+            } else acc
+          case _                                          => acc
+        }
+    }
 
-    val parsedData = if (!containsError) {
-      lines.foldLeft(Map.empty[String, List[String]]) {
-        case (acc, line) =>
-          line.split(":", 2) match {
-            case Array(label, value) if value.trim.nonEmpty && !noData.contains(value.trim.toLowerCase) =>
-              val cleanedLabel = label.trim.toLowerCase
-              val finalLabel   = renameLabels.getOrElse(cleanedLabel, cleanedLabel.capitalize)
-              acc.updated(finalLabel, acc.getOrElse(finalLabel, List.empty) :+ value.trim)
-            case _                                                                                      => acc
-          }
-      }
-    } else Map.empty[String, List[String]]
-
-    val error = if (errorPhrases.exists(phrase => rawWhoisData.contains(phrase)) || rawWhoisData.trim.isEmpty) {
-      Some("No data available for the domain")
-    } else None
-
-    (whoisData(
-       domainName = parsedData.get("Domain Name").flatMap(_.headOption),
-       IDN = parsedData.get("IDN").flatMap(_.headOption),
-       nameServers = parsedData.getOrElse("Name Server", List.empty),
-       domainStatus = parsedData.getOrElse("Domain Status", List.empty),
-       registrarIANAID = parsedData.get("Registrar IANA ID").flatMap(_.headOption),
-       registrar = parsedData.get("Registrar").flatMap(_.headOption),
-       registrarURL = parsedData.get("Registrar URL").flatMap(_.headOption),
-       createdDate = parsedData.get("Created Date").flatMap(_.headOption),
-       updatedDate = parsedData.get("Updated Date").flatMap(_.headOption),
-       expiryDate = parsedData.get("Expiry Date").flatMap(_.headOption),
-       registrantName = parsedData.get("Registrant Name").flatMap(_.headOption),
-       registrantEmail = parsedData.get("Registrant Email").flatMap(_.headOption),
-       registrantStreet = parsedData.get("Registrant Street").flatMap(_.headOption),
-       registrantCity = parsedData.get("Registrant City").flatMap(_.headOption),
-       registrantCountry = parsedData.get("Registrant Country").flatMap(_.headOption),
-       registrantOrganization = parsedData.get("Registrant Organization").flatMap(_.headOption),
-       registrantPhone = parsedData.get("Registrant Phone").flatMap(_.headOption),
-       registrantStateProvince = parsedData.get("Registrant State").flatMap(_.headOption),
-       DNSSEC = parsedData.get("DNSSEC").flatMap(_.headOption)
-     ),
-     error
+    val domainDetails = DomainDetails(
+      domainName = parsedData.get("Domain Name").flatMap(_.headOption),
+      IDN = parsedData.get("IDN").flatMap(_.headOption),
+      nameServers = parsedData.getOrElse("Name Server", List.empty),
+      domainStatus = parsedData.getOrElse("Domain Status", List.empty),
+      registrarIANAID = parsedData.get("Registrar IANA ID").flatMap(_.headOption),
+      registrar = parsedData.get("Registrar").flatMap(_.headOption),
+      registrarURL = parsedData.get("Registrar URL").flatMap(_.headOption),
+      createdDate = parsedData.get("Created Date").flatMap(_.headOption),
+      updatedDate = parsedData.get("Updated Date").flatMap(_.headOption),
+      expiryDate = parsedData.get("Expiry Date").flatMap(_.headOption),
+      registrantName = parsedData.get("Registrant Name").flatMap(_.headOption),
+      registrantEmail = parsedData.get("Registrant Email").flatMap(_.headOption),
+      registrantStreet = parsedData.get("Registrant Street").flatMap(_.headOption),
+      registrantCity = parsedData.get("Registrant City").flatMap(_.headOption),
+      registrantCountry = parsedData.get("Registrant Country").flatMap(_.headOption),
+      registrantOrganization = parsedData.get("Registrant Organization").flatMap(_.headOption),
+      registrantPhone = parsedData.get("Registrant Phone").flatMap(_.headOption),
+      registrantStateProvince = parsedData.get("Registrant State").flatMap(_.headOption),
+      DNSSEC = parsedData.get("DNSSEC").flatMap(_.headOption)
     )
+
+    (domainDetails, None)
   }
 
 }

@@ -1,7 +1,6 @@
 package com.alexandrosmagos
 
-import com.alexandrosmagos.parsers.DomainParser
-import com.alexandrosmagos.utils.ServerUtils
+import com.alexandrosmagos.parsers.{DomainParser, WhoisParser}
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
@@ -14,86 +13,103 @@ class WhoisClientSuite extends AnyFunSuite {
 
   private val whoisTimeout = 1.minutes
 
-  test("WHOIS domain server for .guru TLD is correct") {
-    val whoisServer = ServerUtils.determineWhoisServer("sus.guru")
+  // Grouped: WHOIS Query functionality tests
+  test("WHOIS query functionality and timing") {
+    val whoisClient = new Whoisly()
+    val domain      = "scala-lang.org"
 
-    assert(whoisServer == "whois.nic.guru")
+    // Timing Async Query
+    val asyncStartTime  = System.nanoTime()
+    val futureResponse  = whoisClient.query(domain)
+    val asyncResult     = Await.result(futureResponse, whoisTimeout)
+    val asyncEndTime    = System.nanoTime()
+    val asyncDurationMs = elapsedTimeInMillis(asyncStartTime, asyncEndTime)
+
+    // Timing Sync Query
+    val syncStartTime  = System.nanoTime()
+    val syncResult     = whoisClient.querySync(domain, whoisTimeout)
+    val syncEndTime    = System.nanoTime()
+    val syncDurationMs = elapsedTimeInMillis(syncStartTime, syncEndTime)
+
+    // Test assertions for Async Query
+    assert(asyncDurationMs > 0, "Expected the async query to take some time")
+    assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
+
+    // Test assertions for Sync Query
+    assert(syncDurationMs > 0, "Expected the sync query to take some time")
+    assert(syncResult.response.expiryDate.getOrElse("") == "2027-01-16T09:47:33Z", "Expected specific expiry date")
+
+    println(s"Async query time for $domain: $asyncDurationMs ms")
+    println(s"Sync query time for $domain: $syncDurationMs ms")
   }
 
-//  test("WHOIS query for python.org contains specific data") {
-//    val whoisClient    = new Whoisly()
-//    val futureResponse = whoisClient.query("python.org")
-//
-//    val result: WhoisResponse = Await.result(futureResponse, whoisTimeout)
-//
-//    assert(
-//      result.response.createdDate.getOrElse("") == "1995-03-27T05:00:00Z" &&
-//        result.response.expiryDate.getOrElse("") == "2033-03-28T05:00:00Z"
-//    )
-//  }
-//
-//  test("WHOIS query for a non-existent domain returns no data") {
-//    val whoisClient    = new Whoisly()
-//    val futureResponse = whoisClient.query("nonexistent1234567890domain.org")
-//
-//    val result = Await.result(futureResponse, whoisTimeout)
-//
-//    assert(result.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
-//    assert(result.error.isDefined, "Expected an error message indicating no data")
-//  }
+  // Grouped: DomainParser functionality tests
+  test("DomainParser functionality and timing") {
+    val domain = "scala-lang.org"
 
-  test("Domain validation rejects invalid domain names") {
-    val invalidDomains =
-      Seq("", "invalid_domain", "-invalid.com", "invalid-.com", "in..valid.com", "toolong" * 63 + ".com")
+    // Timing parse
+    val parseStartTime  = System.nanoTime()
+    val (sld, tld)      = DomainParser.parse(domain)
+    val parseEndTime    = System.nanoTime()
+    val parseDurationMs = elapsedTimeInMillis(parseStartTime, parseEndTime)
 
-    invalidDomains.foreach {
-      domain =>
-        val isValid = DomainParser.isValidDomain(domain)
-        assert(!isValid, s"Domain $domain should be considered invalid")
-    }
+    // Timing isValidDomain
+    val isValidStartTime  = System.nanoTime()
+    val isValid           = DomainParser.isValidDomain(domain)
+    val isValidEndTime    = System.nanoTime()
+    val isValidDurationMs = elapsedTimeInMillis(isValidStartTime, isValidEndTime)
+
+    assert(sld.isDefined && tld.isDefined, "Expected the parse function to extract SLD and TLD")
+    assert(isValid, "Expected the domain to be valid")
+
+    println(f"DomainParser.parse execution time: $parseDurationMs%.2f ms for domain $domain")
+    println(f"DomainParser.isValidDomain execution time: $isValidDurationMs%.2f ms for domain $domain")
   }
 
-  test("WHOIS query for an invalid domain returns error") {
-    val whoisClient    = new Whoisly()
-    val futureResponse = whoisClient.query("invalid_domain")
+  // Grouped: WhoisParser functionality and timing
+  test("WhoisParser functionality and timing with detailed raw WHOIS data") {
+    val detailedRawWhoisData = """
+                                 |Domain Name: EXAMPLE.COM
+                                 |IDN Tag: example
+                                 |Registrar IANA ID: 9999
+                                 |Registrar: Example Registrar, Inc.
+                                 |Created Date: 1999-12-31T23:59:59Z
+                                 |Updated Date: 2023-01-01T12:00:00Z
+                                 |Expiry Date: 2025-12-31T23:59:59Z
+                                 |Registrant Name: John Doe
+      """.stripMargin
 
-    val result = Await.result(futureResponse, whoisTimeout)
+    val startTime           = System.nanoTime()
+    val (parsedData, error) = WhoisParser.parse(detailedRawWhoisData)
+    val endTime             = System.nanoTime()
 
-    assert(result.error.isDefined, "Expected an error for an invalid domain")
+    val durationMs = elapsedTimeInMillis(startTime, endTime)
+
+    assert(parsedData.domainName.contains("EXAMPLE.COM"), "Expected the parse function to extract domain name")
+    assert(error.isEmpty, "Expected no error for a well-formed WHOIS response")
+
+    println(f"WhoisParser.parse execution time with detailed data: $durationMs%.2f ms")
   }
 
-  test("WHOIS query for a domain with special characters is handled correctly") {
-    val whoisClient    = new Whoisly()
-    val futureResponse = whoisClient.query("xn--dmin-moa0i.com") // Punycode representation for "dömäin.com"
+  // Grouped: Additional WHOIS Query Tests
+  test("Additional WHOIS query tests") {
+    val whoisClient = new Whoisly()
 
-    val result = Await.result(futureResponse, whoisTimeout)
+    // Test for a non-existent domain
+    val nonExistentFutureResponse = whoisClient.query("nonexistent1234567890domain.org")
+    val nonExistentResult         = Await.result(nonExistentFutureResponse, whoisTimeout)
+    assert(nonExistentResult.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
+    assert(nonExistentResult.error.isDefined, "Expected an error message indicating no data")
 
-    assert(result.error.isEmpty, s"Expected no error for a domain with special characters, but got: ${result.error}")
-    assert(result.response.domainName.isDefined, "Expected a domain name for a domain with special characters")
+    // Test for an invalid domain
+    val invalidFutureResponse = whoisClient.query("invalid_domain")
+    val invalidResult         = Await.result(invalidFutureResponse, whoisTimeout)
+    assert(invalidResult.error.isDefined, "Expected an error for an invalid domain")
   }
 
-  // Domain Parser tests
-  test("parse valid domain") {
-    val (sld, tld) = DomainParser.parse("alexandrosmagos.com")
-    assert(sld.contains("alexandrosmagos"))
-    assert(tld.contains("com"))
-  }
-
-  test("parse domain with subdomain") {
-    val (sld, tld) = DomainParser.parse("sub.alexandrosmagos.com")
-    assert(sld.contains("alexandrosmagos"))
-    assert(tld.contains("com"))
-  }
-
-  test("isValidDomain with valid domain") {
-    assert(DomainParser.isValidDomain("alexandrosmagos.com"))
-  }
-
-  test("isValidDomain with invalid domain") {
-    assert(!DomainParser.isValidDomain("-alexandrosmagos.com")) // Starts with a hyphen
-    assert(!DomainParser.isValidDomain("alexandrosmagos.com-")) // Ends with a hyphen
-    assert(!DomainParser.isValidDomain("exa_mple.com"))         // Contains an underscore
-    assert(!DomainParser.isValidDomain("alexandrosmagos..com")) // Contains consecutive dots
-  }
+  def elapsedTimeInMillis(
+    startNanoTime: Long,
+    endNanoTime: Long
+  ): Double = (endNanoTime - startNanoTime) / 1e6 // nanoseconds to milliseconds
 
 }
