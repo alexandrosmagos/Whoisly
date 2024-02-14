@@ -24,3 +24,12 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+tasks.withType(ScalaCompile).configureEach {
+    scalaCompileOptions.additionalParameters = [
+            '-Ywarn-unused:imports', // Warn about unused imports
+            '-Ywarn-unused:locals',  // Warn about unused locals
+            '-Ywarn-unused:privates', // Warn about unused private members
+            '-Xfatal-warnings'       // Turn warnings into errors
+    ]
+}
