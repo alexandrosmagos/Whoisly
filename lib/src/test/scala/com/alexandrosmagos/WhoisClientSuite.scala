@@ -33,6 +33,8 @@ class WhoisClientSuite extends AnyFunSuite {
 
     // Test assertions for Async Query
     assert(asyncDurationMs > 0, "Expected the async query to take some time")
+    println(s"asyncResult.response: ${asyncResult.response}")
+    println(s"asyncResult.error: ${asyncResult.error}")
     assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
 
     // Test assertions for Sync Query
@@ -98,6 +100,8 @@ class WhoisClientSuite extends AnyFunSuite {
     // Test for a non-existent domain
     val nonExistentFutureResponse = whoisClient.query("nonexistent1234567890domain.org")
     val nonExistentResult         = Await.result(nonExistentFutureResponse, whoisTimeout)
+    println(s"nonExistentResult.response: ${nonExistentResult.response}")
+    println(s"nonExistentResult.error: ${nonExistentResult.error}")
     assert(nonExistentResult.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
     assert(nonExistentResult.error.isDefined, "Expected an error message indicating no data")
 
