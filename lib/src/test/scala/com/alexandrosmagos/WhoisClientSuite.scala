@@ -31,13 +31,14 @@ class WhoisClientSuite extends AnyFunSuite {
     val syncEndTime    = System.nanoTime()
     val syncDurationMs = elapsedTimeInMillis(syncStartTime, syncEndTime)
 
+    println(s"syncResult: $asyncResult")
+    println(s"syncResult: $asyncResult")
+
     // Test assertions for Async Query
     assert(asyncDurationMs > 0, "Expected the async query to take some time")
-//    assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
+    assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
 
     // Test assertions for Sync Query
-    println(s"syncResult.response: ${asyncResult.response}")
-    println(s"syncResult.error: ${asyncResult.error}")
     assert(syncDurationMs > 0, "Expected the sync query to take some time")
     assert(syncResult.response.expiryDate.getOrElse("") == "2027-01-16T09:47:33Z", "Expected specific expiry date")
 
