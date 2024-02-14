@@ -5,3 +5,9 @@ plugins {
 
 rootProject.name = 'Whoisly'
 include('lib')
+
+buildCache {
+    local {
+        enabled = true
+    }
+}
