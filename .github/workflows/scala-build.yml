@@ -25,14 +25,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Test https
-        run: curl -I https://sus.guru/
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      - name: Test with Gradle
-        run: ./gradlew test --info
 
       - name: Build and Test with Gradle
         run: ./gradlew build test
