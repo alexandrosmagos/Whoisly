@@ -25,6 +25,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Check if port 43 is open
+        run: nc -zv google.com 43
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
