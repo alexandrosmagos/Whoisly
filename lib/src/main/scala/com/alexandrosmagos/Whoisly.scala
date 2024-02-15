@@ -37,7 +37,7 @@ class Whoisly {
   ): String = blocking {
     try {
       val socket = new Socket(server, 43)
-      socket.setSoTimeout(5000)
+      socket.setSoTimeout(0)
       try {
         val out = new PrintWriter(socket.getOutputStream, true)
         val in  = new BufferedReader(new InputStreamReader(socket.getInputStream))
