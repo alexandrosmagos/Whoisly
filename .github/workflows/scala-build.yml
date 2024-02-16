@@ -20,7 +20,6 @@ jobs:
         with:
           path: |
             ~/.gradle/caches
-            !~/.gradle/caches/**/*.lock
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
@@ -31,7 +30,4 @@ jobs:
         if: runner.os == 'Linux'
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon
-
-      - name: Run tests with Gradle
-        run: ./gradlew test --no-daemon
+        run: ./gradlew build

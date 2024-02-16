@@ -13,7 +13,6 @@ class WhoisClientSuite extends AnyFunSuite {
 
   private val whoisTimeout = 1.minutes
 
-  //  Commented out due to external dependency issues in CI environment
   // Grouped: WHOIS Query functionality tests
   test("WHOIS query functionality and timing") {
     val whoisClient = new Whoisly()
@@ -32,9 +31,6 @@ class WhoisClientSuite extends AnyFunSuite {
     val syncEndTime    = System.nanoTime()
     val syncDurationMs = elapsedTimeInMillis(syncStartTime, syncEndTime)
 
-    println(s"syncResult: $asyncResult")
-    println(s"syncResult: $asyncResult")
-
     // Test assertions for Async Query
     assert(asyncDurationMs > 0, "Expected the async query to take some time")
     assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
@@ -47,7 +43,6 @@ class WhoisClientSuite extends AnyFunSuite {
     println(s"Sync query time for $domain: $syncDurationMs ms")
   }
 
-  //  Commented out due to external dependency issues in CI environment
   // Grouped: DomainParser functionality tests
   test("DomainParser functionality and timing") {
     val domain = "scala-lang.org"
@@ -96,7 +91,6 @@ class WhoisClientSuite extends AnyFunSuite {
     println(f"WhoisParser.parse execution time with detailed data: $durationMs%.2f ms")
   }
 
-  // Commented out due to external dependency issues in CI environment
   // Grouped: Additional WHOIS Query Tests
   test("Additional WHOIS query tests") {
     val whoisClient = new Whoisly()

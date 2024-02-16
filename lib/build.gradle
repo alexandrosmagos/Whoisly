@@ -33,3 +33,11 @@ tasks.withType(ScalaCompile).configureEach {
             '-Xfatal-warnings'       // Turn warnings into errors
     ]
 }
+
+test {
+    // Set test logging options to show standard out and error streams
+    testLogging {
+        showStandardStreams = true
+        events "passed", "skipped", "failed"
+    }
+}
