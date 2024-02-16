@@ -5,68 +5,71 @@ import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
+
 @RunWith(classOf[JUnitRunner])
 class WhoisClientSuite extends AnyFunSuite {
 
-//  private val whoisTimeout = 1.minutes
+  private val whoisTimeout = 1.minutes
 
   //  Commented out due to external dependency issues in CI environment
   // Grouped: WHOIS Query functionality tests
-//  test("WHOIS query functionality and timing") {
-//    val whoisClient = new Whoisly()
-//    val domain      = "scala-lang.org"
-//
-//    // Timing Async Query
-//    val asyncStartTime  = System.nanoTime()
-//    val futureResponse  = whoisClient.query(domain)
-//    val asyncResult     = Await.result(futureResponse, whoisTimeout)
-//    val asyncEndTime    = System.nanoTime()
-//    val asyncDurationMs = elapsedTimeInMillis(asyncStartTime, asyncEndTime)
-//
-//    // Timing Sync Query
-//    val syncStartTime  = System.nanoTime()
-//    val syncResult     = whoisClient.querySync(domain, whoisTimeout)
-//    val syncEndTime    = System.nanoTime()
-//    val syncDurationMs = elapsedTimeInMillis(syncStartTime, syncEndTime)
-//
-//    println(s"syncResult: $asyncResult")
-//    println(s"syncResult: $asyncResult")
-//
-//    // Test assertions for Async Query
-//    assert(asyncDurationMs > 0, "Expected the async query to take some time")
-//    assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
-//
-//    // Test assertions for Sync Query
-//    assert(syncDurationMs > 0, "Expected the sync query to take some time")
-//    assert(syncResult.response.expiryDate.getOrElse("") == "2027-01-16T09:47:33Z", "Expected specific expiry date")
-//
-//    println(s"Async query time for $domain: $asyncDurationMs ms")
-//    println(s"Sync query time for $domain: $syncDurationMs ms")
-//  }
+  test("WHOIS query functionality and timing") {
+    val whoisClient = new Whoisly()
+    val domain      = "scala-lang.org"
+
+    // Timing Async Query
+    val asyncStartTime  = System.nanoTime()
+    val futureResponse  = whoisClient.query(domain)
+    val asyncResult     = Await.result(futureResponse, whoisTimeout)
+    val asyncEndTime    = System.nanoTime()
+    val asyncDurationMs = elapsedTimeInMillis(asyncStartTime, asyncEndTime)
+
+    // Timing Sync Query
+    val syncStartTime  = System.nanoTime()
+    val syncResult     = whoisClient.querySync(domain, whoisTimeout)
+    val syncEndTime    = System.nanoTime()
+    val syncDurationMs = elapsedTimeInMillis(syncStartTime, syncEndTime)
+
+    println(s"syncResult: $asyncResult")
+    println(s"syncResult: $asyncResult")
+
+    // Test assertions for Async Query
+    assert(asyncDurationMs > 0, "Expected the async query to take some time")
+    assert(asyncResult.response.createdDate.getOrElse("") == "2007-01-16T09:47:33Z", "Expected specific creation date")
+
+    // Test assertions for Sync Query
+    assert(syncDurationMs > 0, "Expected the sync query to take some time")
+    assert(syncResult.response.expiryDate.getOrElse("") == "2027-01-16T09:47:33Z", "Expected specific expiry date")
+
+    println(s"Async query time for $domain: $asyncDurationMs ms")
+    println(s"Sync query time for $domain: $syncDurationMs ms")
+  }
 
   //  Commented out due to external dependency issues in CI environment
   // Grouped: DomainParser functionality tests
-//  test("DomainParser functionality and timing") {
-//    val domain = "scala-lang.org"
-//
-//    // Timing parse
-//    val parseStartTime  = System.nanoTime()
-//    val (sld, tld)      = DomainParser.parse(domain)
-//    val parseEndTime    = System.nanoTime()
-//    val parseDurationMs = elapsedTimeInMillis(parseStartTime, parseEndTime)
-//
-//    // Timing isValidDomain
-//    val isValidStartTime  = System.nanoTime()
-//    val isValid           = DomainParser.isValidDomain(domain)
-//    val isValidEndTime    = System.nanoTime()
-//    val isValidDurationMs = elapsedTimeInMillis(isValidStartTime, isValidEndTime)
-//
-//    assert(sld.isDefined && tld.isDefined, "Expected the parse function to extract SLD and TLD")
-//    assert(isValid, "Expected the domain to be valid")
-//
-//    println(f"DomainParser.parse execution time: $parseDurationMs%.2f ms for domain $domain")
-//    println(f"DomainParser.isValidDomain execution time: $isValidDurationMs%.2f ms for domain $domain")
-//  }
+  test("DomainParser functionality and timing") {
+    val domain = "scala-lang.org"
+
+    // Timing parse
+    val parseStartTime  = System.nanoTime()
+    val (sld, tld)      = DomainParser.parse(domain)
+    val parseEndTime    = System.nanoTime()
+    val parseDurationMs = elapsedTimeInMillis(parseStartTime, parseEndTime)
+
+    // Timing isValidDomain
+    val isValidStartTime  = System.nanoTime()
+    val isValid           = DomainParser.isValidDomain(domain)
+    val isValidEndTime    = System.nanoTime()
+    val isValidDurationMs = elapsedTimeInMillis(isValidStartTime, isValidEndTime)
+
+    assert(sld.isDefined && tld.isDefined, "Expected the parse function to extract SLD and TLD")
+    assert(isValid, "Expected the domain to be valid")
+
+    println(f"DomainParser.parse execution time: $parseDurationMs%.2f ms for domain $domain")
+    println(f"DomainParser.isValidDomain execution time: $isValidDurationMs%.2f ms for domain $domain")
+  }
 
   // Grouped: WhoisParser functionality and timing
   test("WhoisParser functionality and timing with detailed raw WHOIS data") {
@@ -95,20 +98,20 @@ class WhoisClientSuite extends AnyFunSuite {
 
   // Commented out due to external dependency issues in CI environment
   // Grouped: Additional WHOIS Query Tests
-//  test("Additional WHOIS query tests") {
-//    val whoisClient = new Whoisly()
-//
-//    // Test for a non-existent domain
-//    val nonExistentFutureResponse = whoisClient.query("nonexistent1234567890domain.org")
-//    val nonExistentResult         = Await.result(nonExistentFutureResponse, whoisTimeout)
-//    assert(nonExistentResult.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
-//    assert(nonExistentResult.error.isDefined, "Expected an error message indicating no data")
-//
-//    // Test for an invalid domain
-//    val invalidFutureResponse = whoisClient.query("invalid_domain")
-//    val invalidResult         = Await.result(invalidFutureResponse, whoisTimeout)
-//    assert(invalidResult.error.isDefined, "Expected an error for an invalid domain")
-//  }
+  test("Additional WHOIS query tests") {
+    val whoisClient = new Whoisly()
+
+    // Test for a non-existent domain
+    val nonExistentFutureResponse = whoisClient.query("nonexistent1234567890domain.org")
+    val nonExistentResult         = Await.result(nonExistentFutureResponse, whoisTimeout)
+    assert(nonExistentResult.response.domainName.isEmpty, "Expected no domain name for a non-existent domain")
+    assert(nonExistentResult.error.isDefined, "Expected an error message indicating no data")
+
+    // Test for an invalid domain
+    val invalidFutureResponse = whoisClient.query("invalid_domain")
+    val invalidResult         = Await.result(invalidFutureResponse, whoisTimeout)
+    assert(invalidResult.error.isDefined, "Expected an error for an invalid domain")
+  }
 
   test("DomainParser handles multiple subdomains correctly") {
     val (sld, tld) = DomainParser.parse("sub.sub2.example.com")
